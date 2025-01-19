@@ -124,14 +124,25 @@ class _HomepageState extends State<Homepage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My ToDo List'),
+        title: const Text(
+          'My ToDo List',
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        ),
         centerTitle: true,
-        backgroundColor: Colors.teal,
         elevation: 5,
-        leading: const Icon(Icons.list_alt),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFF00B4DB), Color(0xFF0083B0)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
+        leading: const Icon(Icons.list_alt, color: Colors.white),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh, color: Colors.white),
             onPressed: fetchData,
           ),
         ],
@@ -153,6 +164,9 @@ class _HomepageState extends State<Homepage> {
                       final todo = myTodos[index];
                       return Card(
                         elevation: 4,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
                         margin: const EdgeInsets.symmetric(vertical: 8),
                         child: ListTile(
                           title: Text(
@@ -174,7 +188,7 @@ class _HomepageState extends State<Homepage> {
                 ),
       floatingActionButton: FloatingActionButton(
         onPressed: showAddTodoDialog,
-        backgroundColor: Colors.teal,
+        backgroundColor: const Color(0xFF0083B0),
         child: const Icon(Icons.add),
       ),
     );
