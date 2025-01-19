@@ -13,7 +13,7 @@ class Homepage extends StatefulWidget {
 }
 
 class _HomepageState extends State<Homepage> {
-  List<Todo> myTodos = [];
+  List<Task> myTodos = [];
 
   void fetchData() async {
     try {
@@ -21,7 +21,7 @@ class _HomepageState extends State<Homepage> {
       if (response.statusCode == 200) {
         var data = json.decode(response.body);
         setState(() {
-          myTodos = List<Todo>.from(data.map((item) => Todo.fromJson(item)));
+          myTodos = List<Task>.from(data.map((item) => Task.fromJson(item)));
         });
       } else {
         debugPrint('Failed to fetch data. Status code: ${response.statusCode}');
