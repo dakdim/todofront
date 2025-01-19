@@ -14,10 +14,23 @@ class Homepage extends StatefulWidget {
 
 class _HomepageState extends State<Homepage> {
   List<Task> myTodos = [];
+  bool isLoading = false;
+  // print("loading.."),
 
-  void fetchData() async {
+  Future<void> fetchData() async {
+    isLoading = true;
+    setState(() {
+      isLoading = true;
+      print("loading ............................");
+    });
+
     try {
       http.Response response = await http.get(Uri.parse(api));
+      print("loading ............................");
+      isLoading = false;
+      setState(() {});
+
+      print(response.body);
       if (response.statusCode == 200) {
         var data = json.decode(response.body);
         setState(() {
@@ -40,12 +53,15 @@ class _HomepageState extends State<Homepage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('ToDo App')),
+      appBar: AppBar(
+        title: const Text('ToDo App'),
+        centerTitle: true,
+      ),
       body: myTodos.isEmpty
           ? const Center(child: CircularProgressIndicator())
           : ListView.builder(
               itemCount: myTodos.length,
-              itemBuilder: (context, index) {
+              itemBuilder: (BuildContext context, int index) {
                 final todo = myTodos[index];
                 return ListTile(
                   title: Text(todo.title),
