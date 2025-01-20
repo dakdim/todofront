@@ -16,13 +16,14 @@ class _HomepageState extends State<Homepage> {
   List<Task> myTodos = [];
   bool isLoading = false;
 
+  // Fetch data from the API
   Future<void> fetchData() async {
     setState(() {
       isLoading = true;
     });
 
     try {
-      http.Response response = await http.get(Uri.parse(api));
+      final response = await http.get(Uri.parse(api));
       setState(() {
         isLoading = false;
       });
@@ -43,6 +44,7 @@ class _HomepageState extends State<Homepage> {
     }
   }
 
+  // Add a new ToDo item
   Future<void> addNewTodoToAPI(String title, String desc) async {
     try {
       final response = await http.post(
@@ -56,7 +58,6 @@ class _HomepageState extends State<Homepage> {
       );
 
       if (response.statusCode == 201) {
-        // Successfully added, refresh the list
         fetchData();
       } else {
         debugPrint(
@@ -67,6 +68,75 @@ class _HomepageState extends State<Homepage> {
     }
   }
 
+  // Update the "isdone" status of a task
+  Future<void> updateTaskStatus(Task todo, bool updatedStatus) async {
+    try {
+      final response = await http.patch(
+        Uri.parse('$api/${todo.id}/'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({'isdone': updatedStatus}),
+      );
+
+      if (response.statusCode == 200) {
+        setState(() {
+          todo.isdone = updatedStatus;
+        });
+      } else {
+        debugPrint(
+            'Failed to update task status. Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      debugPrint("Error updating task status: $e");
+    }
+  }
+
+  // Delete a task
+  Future<void> deleteTaskFromAPI(int taskId, int index) async {
+    try {
+      final response = await http.delete(Uri.parse('$api/$taskId/'));
+
+      if (response.statusCode == 204) {
+        setState(() {
+          myTodos.removeAt(index);
+        });
+      } else {
+        debugPrint(
+            'Failed to delete task. Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      debugPrint("Error deleting task: $e");
+    }
+  }
+
+  // Show a dialog to confirm deletion
+  void showDeleteConfirmationDialog(Task todo, int index) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Delete Task"),
+          content: Text("Do you really want to delete '${todo.title}'?"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text("Cancel"),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                deleteTaskFromAPI(todo.id, index);
+                Navigator.of(context).pop();
+              },
+              child: const Text("Delete"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Show a dialog to add a new ToDo
   void showAddTodoDialog() {
     final titleController = TextEditingController();
     final descController = TextEditingController();
@@ -169,17 +239,25 @@ class _HomepageState extends State<Homepage> {
                         ),
                         margin: const EdgeInsets.symmetric(vertical: 8),
                         child: ListTile(
+                          onLongPress: () {
+                            showDeleteConfirmationDialog(todo, index);
+                          },
                           title: Text(
                             todo.title,
                             style: const TextStyle(
                                 fontWeight: FontWeight.bold, fontSize: 16),
                           ),
                           subtitle: Text(todo.desc),
-                          trailing: Icon(
-                            todo.isdone
-                                ? Icons.check_circle
-                                : Icons.circle_outlined,
-                            color: todo.isdone ? Colors.green : Colors.red,
+                          trailing: IconButton(
+                            icon: Icon(
+                              todo.isdone
+                                  ? Icons.check_circle
+                                  : Icons.circle_outlined,
+                              color: todo.isdone ? Colors.green : Colors.red,
+                            ),
+                            onPressed: () {
+                              updateTaskStatus(todo, !todo.isdone);
+                            },
                           ),
                         ),
                       );
